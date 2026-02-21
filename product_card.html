@@ -1,0 +1,55 @@
+{% load humanize %}
+<div class="product-card">
+    <div class="product-image-wrapper">
+        <a href="{% url 'store:product_detail' product.slug %}">
+            {% if product.main_image %}
+                <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" loading="lazy">
+            {% else %}
+                <div style="background: #f0f0f0; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #ccc;">
+                    👗
+                </div>
+            {% endif %}
+        </a>
+        {% if product.is_new %}<span class="product-badge new">جدید</span>{% endif %}
+        {% if product.is_on_sale %}<span class="product-badge sale">{{ product.discount_percent }}% تخفیف</span>{% endif %}
+        {% if user.is_authenticated %}
+        <button class="wishlist-btn {% if product.id in user_wishlist %}active{% endif %}"
+                onclick="toggleWishlist(this, '{{ product.id }}')">
+            {% if product.id in user_wishlist %}❤️{% else %}🤍{% endif %}
+        </button>
+        {% endif %}
+    </div>
+    <div class="product-info">
+        {% if product.brand %}
+        <div class="product-brand">{{ product.brand.name }}</div>
+        {% endif %}
+        <a href="{% url 'store:product_detail' product.slug %}">
+            <div class="product-name">{{ product.name }}</div>
+        </a>
+        <div class="product-price">
+            <span class="price-final">{{ product.final_price|intcomma }} تومان</span>
+            {% if product.is_on_sale %}
+            <span class="price-original">{{ product.price|intcomma }}</span>
+            <span class="discount-badge">{{ product.discount_percent }}٪</span>
+            {% endif %}
+        </div>
+        {% if product.average_rating > 0 %}
+        <div class="product-rating">
+            <span class="stars">★</span>
+            {{ product.average_rating|floatformat:1 }}
+            ({{ product.reviews.count }} نظر)
+        </div>
+        {% endif %}
+        <div style="margin-top: 10px;">
+            {% if product.total_stock > 0 %}
+                {% if product.total_stock <= 5 %}
+                <span style="font-size: 0.8rem; color: var(--accent);">⚠️ فقط {{ product.total_stock }} عدد باقی‌مانده</span>
+                {% else %}
+                <span style="font-size: 0.8rem; color: #28a745;">✅ موجود</span>
+                {% endif %}
+            {% else %}
+                <span style="font-size: 0.8rem; color: #999;">❌ ناموجود</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

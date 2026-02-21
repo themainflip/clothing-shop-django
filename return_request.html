@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}درخواست مرجوعی{% endblock %}
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; padding: 0 20px;">
+    <h2 style="margin-bottom: 25px; font-size: 1.5rem;">↩️ درخواست مرجوعی</h2>
+    <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+        <div style="font-weight: 600; margin-bottom: 5px;">{{ order_item.product.name }}</div>
+        <div style="color: #666; font-size: 0.85rem;">{{ order_item.variant.color.name }} | {{ order_item.variant.size.name }} | {{ order_item.quantity }} عدد</div>
+    </div>
+    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>دلیل مرجوعی *</label>
+                <select name="reason" class="form-control" required>
+                    <option value="">انتخاب کنید</option>
+                    {% for value, label in reason_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>توضیحات</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="جزئیات بیشتر..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>تصاویر ایراد</label>
+                <input type="file" name="images" class="form-control" multiple accept="image/*">
+            </div>
+            <div style="background: #fff3cd; padding: 15px; border-radius: 10px; font-size: 0.85rem; color: #856404; margin-bottom: 20px;">
+                ⚠️ پس از تایید درخواست، کالا را به آدرس انبار ارسال کنید. وجه حداکثر ۷۲ ساعت بازگشت داده خواهد شد.
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">ثبت درخواست مرجوعی</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

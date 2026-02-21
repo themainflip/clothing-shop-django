@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}آدرس‌های من{% endblock %}
+{% block content %}
+<div class="container section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h1 style="font-size: 1.8rem;">📍 آدرس‌های من</h1>
+        <a href="{% url 'accounts:add_address' %}" class="btn btn-primary">+ آدرس جدید</a>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        {% for addr in addresses %}
+        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 15px rgba(0,0,0,0.08); {% if addr.is_default %}border: 2px solid var(--accent);{% endif %}">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <strong>{{ addr.title }}</strong>
+                {% if addr.is_default %}<span style="color: var(--accent); font-size: 0.8rem;">پیش‌فرض</span>{% endif %}
+            </div>
+            <p style="font-size: 0.9rem; color: #555; line-height: 1.8;">
+                {{ addr.receiver_name }}<br>
+                📱 {{ addr.receiver_phone }}<br>
+                {{ addr.province }} - {{ addr.city }}<br>
+                {{ addr.address }}<br>
+                کد پستی: {{ addr.postal_code }}
+            </p>
+        </div>
+        {% empty %}
+        <p style="color: #999;">آدرسی وجود ندارد</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

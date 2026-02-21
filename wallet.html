@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}کیف پول{% endblock %}
+{% block content %}
+<div class="container section">
+    <h1 style="margin-bottom: 30px; font-size: 1.8rem;">💰 کیف پول</h1>
+    <div style="background: linear-gradient(135deg, #1a1a2e, #e94560); border-radius: 20px; padding: 30px; color: white; margin-bottom: 30px; text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 800;">{{ request.user.wallet_balance|intcomma }} تومان</div>
+        <div style="opacity: 0.8; margin-top: 5px;">موجودی فعلی</div>
+    </div>
+    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+        <h3 style="margin-bottom: 20px;">تراکنش‌های اخیر</h3>
+        {% for t in transactions %}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
+            <div>
+                <div style="font-weight: 600; font-size: 0.9rem;">{{ t.description }}</div>
+                <div style="font-size: 0.8rem; color: #999;">{{ t.created_at|date:"Y/m/d H:i" }}</div>
+            </div>
+            <div style="font-weight: 700; {% if t.transaction_type == 'deposit' or t.transaction_type == 'refund' %}color: #28a745;{% else %}color: #dc3545;{% endif %}">
+                {% if t.transaction_type == 'deposit' or t.transaction_type == 'refund' %}+{% else %}-{% endif %}{{ t.amount|intcomma }} تومان
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #999; text-align: center; padding: 20px;">هنوز تراکنشی وجود ندارد</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

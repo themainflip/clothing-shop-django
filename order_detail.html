@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}سفارش {{ order.order_number }}{% endblock %}
+{% block content %}
+<div class="container" style="padding: 40px 0; max-width: 900px;">
+    <a href="{% url 'orders:order_list' %}" style="color: #666; font-size: 0.9rem;">← بازگشت به سفارشات</a>
+    <h1 style="margin: 20px 0; font-size: 1.5rem;">📦 سفارش {{ order.order_number }}</h1>
+    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 25px;">
+        <div>
+            <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 15px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 15px; font-size: 1rem;">آیتم‌های سفارش</h3>
+                {% for item in order.items.all %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem;">{{ item.product.name }}</div>
+                        <div style="color: #666; font-size: 0.8rem;">{{ item.variant.color.name }} | {{ item.variant.size.name }} | {{ item.quantity }} عدد</div>
+                    </div>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700;">{{ item.total_price|intcomma }} تومان</div>
+                        {% if order.status == 'delivered' %}
+                        <a href="{% url 'orders:return_request' item.id %}" style="font-size: 0.75rem; color: var(--accent);">درخواست مرجوعی</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 2px 15px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 15px; font-size: 1rem;">آدرس تحویل</h3>
+                <p style="color: #555; font-size: 0.9rem; line-height: 1.8;">
+                    {{ order.receiver_name }}<br>
+                    📱 {{ order.receiver_phone }}<br>
+                    📍 {{ order.shipping_address }}
+                </p>
+            </div>
+        </div>
+        <div>
+            <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 2px 15px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 15px; font-size: 1rem;">خلاصه مالی</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem;"><span style="color: #666;">جمع کالاها:</span><span>{{ order.subtotal|intcomma }}</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem;"><span style="color: #666;">هزینه ارسال:</span><span>{{ order.shipping_cost|intcomma }}</span></div>
+                {% if order.discount_amount %}<div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; color: #28a745;"><span>تخفیف:</span><span>- {{ order.discount_amount|intcomma }}</span></div>{% endif %}
+                <hr style="border: none; border-top: 1px solid #eee; margin: 12px 0;">
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1rem;"><span>مجموع:</span><span style="color: var(--accent);">{{ order.total|intcomma }} تومان</span></div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; font-size: 0.85rem; color: #555;">
+                    <div style="margin-bottom: 5px;">📅 تاریخ سفارش: {{ order.created_at|date:"Y/m/d" }}</div>
+                    <div style="margin-bottom: 5px;">💳 روش پرداخت: {{ order.get_payment_method_display }}</div>
+                    <div>🚚 روش ارسال: {{ order.get_shipping_method_display }}</div>
+                    {% if order.tracking_code %}<div style="margin-top: 5px;">📦 کد رهگیری: <strong>{{ order.tracking_code }}</strong></div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}جستجو: {{ q }}{% endblock %}
+{% block content %}
+<div class="container section">
+    <h2 style="margin-bottom: 25px;">
+        نتایج جستجو برای: <span style="color: var(--accent);">{{ q }}</span>
+        <small style="font-size: 0.9rem; color: #666;">({{ results|length }} مورد)</small>
+    </h2>
+    {% if results %}
+    <div class="products-grid">
+        {% for product in results %}
+        {% include 'partials/product_card.html' with user_wishlist='' %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 80px; background: white; border-radius: 15px;">
+        <div style="font-size: 4rem; margin-bottom: 15px;">🔍</div>
+        <h3>نتیجه‌ای یافت نشد</h3>
+        <a href="{% url 'store:product_list' %}" class="btn btn-primary" style="margin-top: 20px;">مشاهده همه محصولات</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

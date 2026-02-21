@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.product-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; padding: 40px 0; }
+.gallery { position: sticky; top: 120px; }
+.main-image { aspect-ratio: 3/4; border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: #f5f5f5; }
+.main-image img { width: 100%; height: 100%; object-fit: cover; }
+.thumbnails { display: flex; gap: 10px; flex-wrap: wrap; }
+.thumb { width: 70px; height: 90px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; }
+.thumb:hover, .thumb.active { border-color: var(--accent); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.product-title { font-size: 1.6rem; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
+.product-meta { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+.price-section { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+.variant-section { margin-bottom: 25px; }
+.variant-label { font-weight: 600; margin-bottom: 10px; font-size: 0.95rem; }
+.color-options { display: flex; gap: 10px; flex-wrap: wrap; }
+.color-btn { width: 35px; height: 35px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.3s; }
+.color-btn:hover, .color-btn.selected { border-color: #1a1a2e; transform: scale(1.15); }
+.size-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.size-btn { padding: 8px 18px; border: 1.5px solid #ddd; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: all 0.3s; background: white; }
+.size-btn:hover { border-color: #1a1a2e; }
+.size-btn.selected { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+.size-btn.out-of-stock { opacity: 0.4; text-decoration: line-through; cursor: not-allowed; }
+.add-to-cart-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.3s; margin-bottom: 10px; }
+.add-to-cart-btn:hover { background: #c73652; transform: translateY(-2px); }
+.action-btns { display: flex; gap: 10px; }
+.action-btn { flex: 1; padding: 12px; border: 1.5px solid #ddd; border-radius: 10px; background: white; font-family: inherit; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; }
+.action-btn:hover { border-color: #1a1a2e; }
+.tabs { border-bottom: 2px solid #eee; margin-bottom: 25px; display: flex; gap: 0; }
+.tab-btn { padding: 12px 20px; border: none; background: none; font-family: inherit; font-size: 0.95rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.3s; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.review-card { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+.review-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+@media (max-width: 900px) { .product-detail { grid-template-columns: 1fr; } .gallery { position: static; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="breadcrumb">
+        <a href="{% url 'store:home' %}">خانه</a> /
+        <a href="{% url 'store:product_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a> /
+        {{ product.name }}
+    </div>
+
+    <div class="product-detail">
+        <!-- Gallery -->
+        <div class="gallery">
+            <div class="main-image" id="main-image">
+                {% if product.main_image %}
+                <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" id="current-image">
+                {% else %}
+                <div style="height: 100%; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #ccc;">👗</div>
+                {% endif %}
+            </div>
+            {% if product.images.count > 1 %}
+            <div class="thumbnails">
+                {% for img in product.images.all %}
+                <div class="thumb {% if img.is_main %}active{% endif %}" onclick="changeImage(this, '{{ img.image.url }}')">
+                    <img src="{{ img.image.url }}" alt="{{ product.name }}">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info-panel">
+            {% if product.brand %}
+            <div style="color: var(--accent); font-weight: 600; margin-bottom: 8px;">{{ product.brand.name }}</div>
+            {% endif %}
+            <h1 class="product-title">{{ product.name }}</h1>
+
+            <div class="product-meta">
+                <span>کد: {{ product.sku }}</span>
+                {% if product.average_rating > 0 %}
+                <span>⭐ {{ product.average_rating|floatformat:1 }} ({{ product.reviews.count }} نظر)</span>
+                {% endif %}
+                <span>{{ product.view_count }} بازدید</span>
+                {% if product.is_domestic %}<span style="color: #28a745;">🇮🇷 تولید داخل</span>{% endif %}
+            </div>
+
+            <!-- Price -->
+            <div class="price-section">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 5px;">
+                    <span style="font-size: 1.8rem; font-weight: 800; color: #1a1a2e;">
+                        {{ product.final_price|intcomma }} تومان
+                    </span>
+                    {% if product.is_on_sale %}
+                    <span style="background: var(--accent); color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.9rem; font-weight: 700;">
+                        {{ product.discount_percent }}٪ تخفیف
+                    </span>
+                    {% endif %}
+                </div>
+                {% if product.is_on_sale %}
+                <div style="text-decoration: line-through; color: #999; font-size: 1rem;">
+                    {{ product.price|intcomma }} تومان
+                </div>
+                {% endif %}
+                {% if product.total_stock <= 5 and product.total_stock > 0 %}
+                <div style="color: var(--accent); font-size: 0.9rem; margin-top: 10px;">
+                    ⚠️ فقط {{ product.total_stock }} عدد باقی‌مانده!
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Variants Form -->
+            <form method="post" action="{% url 'cart:add' 0 %}" id="add-to-cart-form">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="variant_id" id="selected-variant-id">
+
+                <!-- Color -->
+                <div class="variant-section">
+                    <div class="variant-label">رنگ: <span id="selected-color-name">انتخاب کنید</span></div>
+                    <div class="color-options">
+                        {% for color_name, variants in variants_by_color.items %}
+                        <button type="button" class="color-btn"
+                                style="background: {{ variants.0.color.hex_code }};"
+                                title="{{ color_name }}"
+                                data-color="{{ color_name }}"
+                                onclick="selectColor(this, '{{ color_name }}')">
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Size -->
+                <div class="variant-section">
+                    <div class="variant-label">
+                        سایز: <span id="selected-size-name">انتخاب کنید</span>
+                        {% if product.model_height %}
+                        <small style="color: #666; font-weight: 400;">(مدل {{ product.model_height }} سانتی‌متر)</small>
+                        {% endif %}
+                    </div>
+                    <div class="size-options" id="size-options">
+                        <span style="color: #999; font-size: 0.9rem;">ابتدا رنگ را انتخاب کنید</span>
+                    </div>
+                    <a href="#size-guide" style="font-size: 0.85rem; color: var(--accent); margin-top: 8px; display: inline-block;">📏 راهنمای سایزبندی</a>
+                </div>
+
+                <!-- Quantity -->
+                <div class="variant-section">
+                    <div class="variant-label">تعداد:</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button type="button" onclick="changeQty(-1)" style="width: 35px; height: 35px; border: 1px solid #ddd; border-radius: 8px; background: white; font-size: 1.2rem; cursor: pointer;">-</button>
+                        <input type="number" name="quantity" value="1" min="1" max="10" id="qty-input"
+                               style="width: 60px; text-align: center; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit;">
+                        <button type="button" onclick="changeQty(1)" style="width: 35px; height: 35px; border: 1px solid #ddd; border-radius: 8px; background: white; font-size: 1.2rem; cursor: pointer;">+</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="add-to-cart-btn" id="add-cart-btn">🛒 افزودن به سبد خرید</button>
+            </form>
+
+            <div class="action-btns">
+                {% if user.is_authenticated %}
+                <button class="action-btn {% if product.id in user_wishlist %}active{% endif %}"
+                        onclick="toggleWishlist(this, '{{ product.id }}')">
+                    {% if product.id in user_wishlist %}❤️{% else %}🤍{% endif %} علاقه‌مندی
+                </button>
+                {% endif %}
+                <button class="action-btn" onclick="shareProduct()">🔗 اشتراک‌گذاری</button>
+            </div>
+
+            <!-- Features -->
+            <div style="background: #f0f8f0; border-radius: 10px; padding: 15px; margin-top: 20px;">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; font-size: 0.85rem; color: #333;">
+                    <span>✅ ۷ روز ضمانت بازگشت</span>
+                    <span>🚚 ارسال سریع</span>
+                    <span>🔒 پرداخت امن</span>
+                    <span>🎁 بسته‌بندی رایگان</span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div style="margin-top: 30px;">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('description', this)">توضیحات</button>
+                    <button class="tab-btn" onclick="showTab('specs', this)">مشخصات</button>
+                    <button class="tab-btn" onclick="showTab('reviews', this)">نظرات ({{ product.reviews.count }})</button>
+                    <button class="tab-btn" onclick="showTab('questions', this)">سوالات ({{ product.questions.count }})</button>
+                </div>
+
+                <div class="tab-content active" id="tab-description">
+                    <p style="line-height: 2; color: #555;">{{ product.description|linebreaks }}</p>
+                    {% if product.washing_instructions %}
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                        <strong>🧺 نحوه شستشو:</strong><br>{{ product.washing_instructions }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="tab-content" id="tab-specs">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        {% if product.fabric %}<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">جنس پارچه</td><td style="padding: 10px; font-weight: 600;">{{ product.get_fabric_display }}</td></tr>{% endif %}
+                        {% if product.neck_type %}<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">نوع یقه</td><td style="padding: 10px; font-weight: 600;">{{ product.get_neck_type_display }}</td></tr>{% endif %}
+                        {% if product.sleeve_type %}<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">نوع آستین</td><td style="padding: 10px; font-weight: 600;">{{ product.get_sleeve_type_display }}</td></tr>{% endif %}
+                        {% if product.season %}<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">فصل</td><td style="padding: 10px; font-weight: 600;">{{ product.get_season_display }}</td></tr>{% endif %}
+                        {% if product.occasion %}<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">مناسبت</td><td style="padding: 10px; font-weight: 600;">{{ product.get_occasion_display }}</td></tr>{% endif %}
+                        {% if product.model_height %}<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">قد مدل</td><td style="padding: 10px; font-weight: 600;">{{ product.model_height }} سانتی‌متر</td></tr>{% endif %}
+                        {% if product.model_size %}<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">سایز پوشیده‌شده</td><td style="padding: 10px; font-weight: 600;">{{ product.model_size }}</td></tr>{% endif %}
+                    </table>
+                    <div id="size-guide" style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 10px;">
+                        <strong>📏 راهنمای سایزبندی</strong><br>
+                        <small>XS: ۳۴-۳۶ | S: ۳۶-۳۸ | M: ۳۸-۴۰ | L: ۴۰-۴۲ | XL: ۴۲-۴۴ | XXL: ۴۴-۴۶</small>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-reviews">
+                    {% if user.is_authenticated and not user_review %}
+                    <form method="post" action="{% url 'store:add_review' product.id %}">
+                        {% csrf_token %}
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin-bottom: 15px;">نظر خود را بنویسید</h4>
+                            <div class="form-group">
+                                <label>امتیاز:</label>
+                                <div style="display: flex; gap: 10px;">
+                                    {% for i in "12345" %}
+                                    <label style="cursor: pointer; font-size: 1.5rem;">
+                                        <input type="radio" name="rating" value="{{ i }}" style="display: none;">
+                                        ⭐
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>عنوان:</label>
+                                <input type="text" name="title" class="form-control" placeholder="خلاصه نظر">
+                            </div>
+                            <div class="form-group">
+                                <label>متن نظر:</label>
+                                <textarea name="body" class="form-control" rows="4" placeholder="تجربه خود را بنویسید..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>سایز:</label>
+                                <select name="size_feedback" class="form-control">
+                                    <option value="">انتخاب کنید</option>
+                                    <option value="small">کوچک‌تر از حد معمول</option>
+                                    <option value="true">مطابق سایزبندی</option>
+                                    <option value="large">بزرگ‌تر از حد معمول</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">ارسال نظر</button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div>
+                                <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+                                {% if review.is_verified_purchase %}
+                                <span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-right: 8px;">خرید تایید‌شده</span>
+                                {% endif %}
+                            </div>
+                            <span style="color: #f5a623;">{{ review.rating }}★</span>
+                        </div>
+                        {% if review.title %}<div style="font-weight: 600; margin-bottom: 5px;">{{ review.title }}</div>{% endif %}
+                        <p style="color: #555; font-size: 0.9rem;">{{ review.body }}</p>
+                        {% if review.size_feedback %}
+                        <small style="color: #666;">👕 سایز: {{ review.get_size_feedback_display }}</small>
+                        {% endif %}
+                        <div style="font-size: 0.8rem; color: #999; margin-top: 5px;">{{ review.created_at|date:"Y/m/d" }}</div>
+                    </div>
+                    {% empty %}
+                    <p style="color: #999; text-align: center; padding: 30px;">هنوز نظری ثبت نشده</p>
+                    {% endfor %}
+                </div>
+
+                <div class="tab-content" id="tab-questions">
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'store:ask_question' product.id %}">
+                        {% csrf_token %}
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <input type="text" name="question" class="form-control" placeholder="سوال خود را بنویسید..." required>
+                            <button type="submit" class="btn btn-primary">ارسال</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                    {% for q in questions %}
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                        <div style="font-weight: 600; margin-bottom: 5px;">❓ {{ q.question }}</div>
+                        {% if q.answer %}
+                        <div style="color: #155724; padding: 10px; background: #d4edda; border-radius: 8px; margin-top: 8px;">
+                            💬 {{ q.answer }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p style="color: #999; text-align: center; padding: 30px;">هنوز سوالی ثبت نشده</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related %}
+    <div class="section">
+        <div class="section-title"><h2>محصولات مشابه</h2></div>
+        <div class="products-grid">
+            {% for product in related %}{% include 'partials/product_card.html' with user_wishlist='' %}{% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variants data
+const variantData = {
+    {% for color_name, variants in variants_by_color.items %}
+    "{{ color_name }}": [
+        {% for v in variants %}
+        { id: {{ v.id }}, size: "{{ v.size.name }}", stock: {{ v.stock }} },
+        {% endfor %}
+    ],
+    {% endfor %}
+};
+
+let selectedColor = null;
+let selectedSize = null;
+
+function selectColor(btn, colorName) {
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedColor = colorName;
+    document.getElementById('selected-color-name').textContent = colorName;
+
+    // Update sizes
+    const sizes = variantData[colorName];
+    const sizeContainer = document.getElementById('size-options');
+    sizeContainer.innerHTML = sizes.map(v =>
+        `<button type="button" class="size-btn ${v.stock === 0 ? 'out-of-stock' : ''}"
+         onclick="${v.stock > 0 ? `selectSize(this, ${v.id}, '${v.size}')` : ''}"
+         ${v.stock === 0 ? 'disabled' : ''}>
+         ${v.size}${v.stock === 0 ? ' (ناموجود)' : ''}
+        </button>`
+    ).join('');
+    selectedSize = null;
+    document.getElementById('selected-size-name').textContent = 'انتخاب کنید';
+    document.getElementById('selected-variant-id').value = '';
+}
+
+function selectSize(btn, variantId, sizeName) {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedSize = variantId;
+    document.getElementById('selected-size-name').textContent = sizeName;
+    document.getElementById('selected-variant-id').value = variantId;
+    // Update form action
+    document.getElementById('add-to-cart-form').action = `/cart/add/${variantId}/`;
+}
+
+function changeQty(delta) {
+    const input = document.getElementById('qty-input');
+    const newVal = Math.max(1, Math.min(10, parseInt(input.value) + delta));
+    input.value = newVal;
+}
+
+function changeImage(thumb, url) {
+    document.getElementById('current-image').src = url;
+    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+}
+
+function showTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
+function shareProduct() {
+    if (navigator.share) {
+        navigator.share({ title: '{{ product.name }}', url: window.location.href });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('لینک کپی شد!');
+    }
+}
+
+// Validate add to cart
+document.getElementById('add-to-cart-form').addEventListener('submit', function(e) {
+    if (!document.getElementById('selected-variant-id').value) {
+        e.preventDefault();
+        alert('لطفاً رنگ و سایز را انتخاب کنید.');
+    }
+});
+</script>
+{% endblock %}

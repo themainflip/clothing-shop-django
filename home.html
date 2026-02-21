@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}فروشگاه مد آنلاین - بهترین برندهای لباس{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>ترند جدید<br><span>بهار ۱۴۰۳</span> اینجاست!</h1>
+            <p>کالکشن جدید برندهای برتر با بیشترین تخفیف‌های فصلی</p>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="{% url 'store:product_list' %}" class="btn btn-primary">🛍️ خرید کنید</a>
+                <a href="{% url 'store:product_list' %}?on_sale=1" class="btn btn-outline">🔥 حراج ویژه</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Banner strip -->
+<div style="background: linear-gradient(90deg, var(--accent) 0%, #f5a623 100%); color: white; text-align: center; padding: 12px; font-size: 0.9rem; font-weight: 600;">
+    🚚 ارسال رایگان برای خریدهای بالای ۵۰۰,۰۰۰ تومان | ✅ ۷ روز ضمانت بازگشت | 💳 پرداخت اقساطی
+</div>
+
+<!-- Categories -->
+<section class="section">
+    <div class="container">
+        <div class="section-title">
+            <h2>دسته‌بندی‌ها</h2>
+            <a href="{% url 'store:product_list' %}">مشاهده همه ←</a>
+        </div>
+        <div class="categories-grid">
+            <a href="{% url 'store:product_list' %}?gender=women" class="category-card">
+                <div class="category-icon">👗</div>
+                <h3>پوشاک زنانه</h3>
+            </a>
+            <a href="{% url 'store:product_list' %}?gender=men" class="category-card">
+                <div class="category-icon">👔</div>
+                <h3>پوشاک مردانه</h3>
+            </a>
+            <a href="{% url 'store:product_list' %}?occasion=sport" class="category-card">
+                <div class="category-icon">🏃</div>
+                <h3>ورزشی</h3>
+            </a>
+            <a href="{% url 'store:product_list' %}?occasion=formal" class="category-card">
+                <div class="category-icon">💼</div>
+                <h3>رسمی</h3>
+            </a>
+            <a href="{% url 'store:product_list' %}?occasion=party" class="category-card">
+                <div class="category-icon">✨</div>
+                <h3>مجلسی</h3>
+            </a>
+            <a href="{% url 'store:product_list' %}?occasion=casual" class="category-card">
+                <div class="category-icon">☕</div>
+                <h3>راحتی</h3>
+            </a>
+            <a href="{% url 'store:product_list' %}" class="category-card">
+                <div class="category-icon">👜</div>
+                <h3>کیف</h3>
+            </a>
+            <a href="{% url 'store:product_list' %}" class="category-card">
+                <div class="category-icon">👟</div>
+                <h3>کفش</h3>
+            </a>
+            {% for cat in top_categories %}
+            <a href="{% url 'store:category_detail' cat.slug %}" class="category-card">
+                <div class="category-icon">🏷️</div>
+                <h3>{{ cat.name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="section" style="background: white; padding: 60px 0;">
+    <div class="container">
+        <div class="section-title">
+            <h2>⭐ محصولات ویژه</h2>
+            <a href="{% url 'store:product_list' %}">مشاهده همه ←</a>
+        </div>
+        <div class="products-grid">
+            {% for product in featured_products %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- On Sale Banner -->
+<section style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 50px 0; color: white;">
+    <div class="container" style="text-align: center;">
+        <h2 style="font-size: 2rem; margin-bottom: 10px;">🔥 حراج ویژه فصلی</h2>
+        <p style="opacity: 0.8; margin-bottom: 25px;">تا ۷۰٪ تخفیف روی محصولات منتخب</p>
+        <a href="{% url 'store:product_list' %}?on_sale=1" class="btn btn-primary">مشاهده حراج</a>
+    </div>
+</section>
+
+<!-- New Arrivals -->
+{% if new_arrivals %}
+<section class="section">
+    <div class="container">
+        <div class="section-title">
+            <h2>🆕 جدیدترین محصولات</h2>
+            <a href="{% url 'store:product_list' %}?sort=-created_at">مشاهده همه ←</a>
+        </div>
+        <div class="products-grid">
+            {% for product in new_arrivals %}
+            {% include 'partials/product_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features -->
+<section style="background: white; padding: 50px 0; border-top: 1px solid #eee;">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; text-align: center;">
+            <div>
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">🚚</div>
+                <h3 style="font-size: 1rem; margin-bottom: 5px;">ارسال سریع</h3>
+                <p style="font-size: 0.85rem; color: #666;">ارسال فوری به سراسر ایران</p>
+            </div>
+            <div>
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">✅</div>
+                <h3 style="font-size: 1rem; margin-bottom: 5px;">ضمانت بازگشت</h3>
+                <p style="font-size: 0.85rem; color: #666;">۷ روز مهلت تست و بازگشت</p>
+            </div>
+            <div>
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">🔒</div>
+                <h3 style="font-size: 1rem; margin-bottom: 5px;">پرداخت امن</h3>
+                <p style="font-size: 0.85rem; color: #666;">درگاه بانکی معتبر</p>
+            </div>
+            <div>
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">🎁</div>
+                <h3 style="font-size: 1rem; margin-bottom: 5px;">امتیاز وفاداری</h3>
+                <p style="font-size: 0.85rem; color: #666;">با هر خرید امتیاز بگیرید</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

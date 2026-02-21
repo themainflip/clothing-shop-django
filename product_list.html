@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}محصولات{% endblock %}
+
+{% block extra_css %}
+<style>
+.shop-layout { display: grid; grid-template-columns: 270px 1fr; gap: 30px; padding: 30px 0; }
+.sidebar { background: white; border-radius: 12px; padding: 20px; height: fit-content; position: sticky; top: 120px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+.filter-section { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+.filter-section:last-child { border-bottom: none; }
+.filter-section h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; color: #1a1a2e; }
+.filter-option { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.9rem; cursor: pointer; }
+.filter-option input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
+.price-range { display: flex; gap: 10px; }
+.price-input { flex: 1; padding: 8px 10px; border: 1.5px solid #eee; border-radius: 8px; font-size: 0.85rem; font-family: inherit; }
+.sort-bar { display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.sort-buttons { display: flex; gap: 8px; }
+.sort-btn { padding: 7px 15px; border-radius: 20px; border: 1.5px solid #eee; background: white; font-family: inherit; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; }
+.sort-btn.active, .sort-btn:hover { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+@media (max-width: 900px) {
+    .shop-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="breadcrumb">
+        <a href="{% url 'store:home' %}">خانه</a> / محصولات
+        {% if request.GET.category %} / {{ request.GET.category }}{% endif %}
+    </div>
+
+    <div class="shop-layout">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <form method="get" id="filter-form">
+                <h3 style="margin-bottom: 20px; font-size: 1.1rem;">🔍 فیلترها</h3>
+
+                <!-- Gender -->
+                <div class="filter-section">
+                    <h4>جنسیت</h4>
+                    <label class="filter-option">
+                        <input type="radio" name="gender" value="women" {% if request.GET.gender == 'women' %}checked{% endif %}>
+                        زنانه
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="gender" value="men" {% if request.GET.gender == 'men' %}checked{% endif %}>
+                        مردانه
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="gender" value="unisex" {% if request.GET.gender == 'unisex' %}checked{% endif %}>
+                        یونی‌سکس
+                    </label>
+                </div>
+
+                <!-- Price Range -->
+                <div class="filter-section">
+                    <h4>قیمت (تومان)</h4>
+                    <div class="price-range">
+                        <input type="number" name="min_price" class="price-input" placeholder="از"
+                               value="{{ request.GET.min_price }}">
+                        <input type="number" name="max_price" class="price-input" placeholder="تا"
+                               value="{{ request.GET.max_price }}">
+                    </div>
+                </div>
+
+                <!-- Fabric -->
+                <div class="filter-section">
+                    <h4>جنس پارچه</h4>
+                    {% for value, label in fabric_choices %}
+                    <label class="filter-option">
+                        <input type="checkbox" name="fabric" value="{{ value }}"
+                               {% if value in request.GET.getlist|default:'' %}checked{% endif %}>
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <!-- Season -->
+                <div class="filter-section">
+                    <h4>فصل</h4>
+                    {% for value, label in season_choices %}
+                    <label class="filter-option">
+                        <input type="radio" name="season" value="{{ value }}"
+                               {% if request.GET.season == value %}checked{% endif %}>
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <!-- Occasion -->
+                <div class="filter-section">
+                    <h4>مناسبت</h4>
+                    {% for value, label in occasion_choices %}
+                    <label class="filter-option">
+                        <input type="radio" name="occasion" value="{{ value }}"
+                               {% if request.GET.occasion == value %}checked{% endif %}>
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <!-- Quick filters -->
+                <div class="filter-section">
+                    <h4>فیلتر سریع</h4>
+                    <label class="filter-option">
+                        <input type="checkbox" name="on_sale" value="1"
+                               {% if request.GET.on_sale %}checked{% endif %}>
+                        فقط تخفیف‌دار
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="in_stock" value="1"
+                               {% if request.GET.in_stock %}checked{% endif %}>
+                        فقط موجود
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="domestic" value="1"
+                               {% if request.GET.domestic %}checked{% endif %}>
+                        تولید داخل
+                    </label>
+                </div>
+
+                <!-- Brands -->
+                <div class="filter-section">
+                    <h4>برند</h4>
+                    {% for brand in brands|slice:":10" %}
+                    <label class="filter-option">
+                        <input type="checkbox" name="brand" value="{{ brand.id }}"
+                               {% if request.GET.brand == brand.id|stringformat:"s" %}checked{% endif %}>
+                        {{ brand.name }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">اعمال فیلترها</button>
+                <a href="{% url 'store:product_list' %}" style="display: block; text-align: center; margin-top: 10px; font-size: 0.85rem; color: #666;">پاک کردن فیلترها</a>
+            </form>
+        </aside>
+
+        <!-- Products -->
+        <main>
+            <!-- Sort Bar -->
+            <div class="sort-bar">
+                <span style="font-size: 0.9rem; color: #666;">
+                    <strong>{{ total_count }}</strong> محصول یافت شد
+                </span>
+                <div class="sort-buttons">
+                    <a href="?{{ request.GET.urlencode }}&sort=-created_at" class="sort-btn {% if sort == '-created_at' %}active{% endif %}">جدیدترین</a>
+                    <a href="?{{ request.GET.urlencode }}&sort=bestseller" class="sort-btn {% if sort == 'bestseller' %}active{% endif %}">پرفروش</a>
+                    <a href="?{{ request.GET.urlencode }}&sort=price_asc" class="sort-btn {% if sort == 'price_asc' %}active{% endif %}">ارزان‌ترین</a>
+                    <a href="?{{ request.GET.urlencode }}&sort=price_desc" class="sort-btn {% if sort == 'price_desc' %}active{% endif %}">گران‌ترین</a>
+                    <a href="?{{ request.GET.urlencode }}&sort=discount" class="sort-btn {% if sort == 'discount' %}active{% endif %}">بیشترین تخفیف</a>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            {% if page_obj %}
+            <div class="products-grid">
+                {% for product in page_obj %}
+                {% include 'partials/product_card.html' with user_wishlist='' %}
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}" class="page-link">←</a>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="page-link active">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?{{ request.GET.urlencode }}&page={{ num }}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <a href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}" class="page-link">→</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div style="text-align: center; padding: 80px; color: #999;">
+                <div style="font-size: 4rem; margin-bottom: 15px;">😔</div>
+                <h3>محصولی یافت نشد</h3>
+                <p>فیلترهای خود را تغییر دهید یا</p>
+                <a href="{% url 'store:product_list' %}" class="btn btn-primary" style="margin-top: 15px;">همه محصولات را ببینید</a>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+{% endblock %}

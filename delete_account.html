@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}حذف حساب{% endblock %}
+{% block content %}
+<div style="max-width: 450px; margin: 60px auto; padding: 0 20px; text-align: center;">
+    <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <div style="font-size: 4rem; margin-bottom: 15px;">⚠️</div>
+        <h2 style="color: #dc3545; margin-bottom: 15px;">حذف حساب کاربری</h2>
+        <p style="color: #666; margin-bottom: 25px; line-height: 1.8;">این عمل قابل برگشت نیست. تمام اطلاعات شما حذف خواهد شد.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn" style="background: #dc3545; color: white; width: 100%; margin-bottom: 10px;">بله، حذف شود</button>
+            <a href="{% url 'accounts:profile' %}" style="display: block; color: #666; font-size: 0.9rem;">انصراف</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

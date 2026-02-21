@@ -1,18 +1,18 @@
-from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path
+from . import views
+
+app_name = 'accounts'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('apps.store.urls')),
-    path('accounts/', include('apps.accounts.urls')),
-    path('orders/', include('apps.orders.urls')),
-    path('cart/', include('apps.cart.urls')),
-    path('vendors/', include('apps.vendors.urls')),
-    path('blog/', include('apps.blog.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-admin.site.site_header = 'مدیریت فروشگاه مد'
-admin.site.site_title = 'FashionStore Admin'
-admin.site.index_title = 'پنل مدیریت'
+    path('register/', views.register, name='register'),
+    path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
+    path('profile/', views.profile, name='profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('profile/change-password/', views.change_password, name='change_password'),
+    path('profile/delete/', views.delete_account, name='delete_account'),
+    path('addresses/', views.addresses, name='addresses'),
+    path('addresses/add/', views.add_address, name='add_address'),
+    path('wallet/', views.wallet, name='wallet'),
+    path('loyalty/', views.loyalty_points, name='loyalty'),
+]

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}فروشگاه مد{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --accent2: #f5a623;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --white: #ffffff;
+            --shadow: 0 2px 20px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.15);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
+            background: #fafafa;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+
+        /* Navbar */
+        .navbar {
+            background: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .navbar-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            gap: 20px;
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .navbar-brand span { color: var(--accent); }
+
+        .navbar-search {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .navbar-search input {
+            width: 100%;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .navbar-search input::placeholder { color: rgba(255,255,255,0.6); }
+        .navbar-search input:focus { outline: none; background: rgba(255,255,255,0.2); }
+
+        .navbar-search button {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar-actions a {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .navbar-actions a:hover { color: white; }
+
+        .cart-badge {
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Category nav */
+        .category-nav {
+            background: var(--secondary);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .category-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+        }
+
+        .category-nav ul::-webkit-scrollbar { display: none; }
+
+        .category-nav li a {
+            display: block;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .category-nav li a:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .category-nav li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .category-nav li a:hover::after { transform: scaleX(1); }
+
+        /* Messages */
+        .messages-container {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        .message {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: var(--shadow-hover);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message.success { background: #d4edda; color: #155724; border-right: 4px solid #28a745; }
+        .message.error { background: #f8d7da; color: #721c24; border-right: 4px solid #dc3545; }
+        .message.warning { background: #fff3cd; color: #856404; border-right: 4px solid #ffc107; }
+        .message.info { background: #d1ecf1; color: #0c5460; border-right: 4px solid #17a2b8; }
+
+        .message-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #0f3460 50%, var(--secondary) 100%);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hero-content { position: relative; z-index: 1; }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .hero h1 span { color: var(--accent); }
+
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #c73652;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233,69,96,0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Section titles */
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            position: relative;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .section-title a { color: var(--gray); font-size: 0.9rem; }
+
+        /* Product Cards */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+        }
+
+        .product-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .product-card:hover .product-image-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .product-badge.new { background: #28a745; }
+        .product-badge.sale { background: var(--accent); }
+
+        .wishlist-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            font-size: 1.1rem;
+            color: var(--gray);
+        }
+
+        .wishlist-btn:hover, .wishlist-btn.active { color: var(--accent); }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-brand {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .product-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .price-final {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .price-original {
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-decoration: line-through;
+        }
+
+        .discount-badge {
+            background: #fff0f0;
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .stars { color: var(--accent2); }
+
+        /* Category Cards */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .category-card {
+            text-align: center;
+            padding: 20px 15px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            background: var(--primary);
+            color: white;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .category-card h3 { font-size: 0.9rem; font-weight: 600; }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: rgba(255,255,255,0.7);
+            padding: 60px 0 20px;
+            margin-top: 80px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h4 {
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 8px; }
+        .footer-col ul li a { transition: var(--transition); font-size: 0.9rem; }
+        .footer-col ul li a:hover { color: var(--accent); }
+
+        .footer-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .footer-brand span { color: var(--accent); }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        /* Forms */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1.5px solid var(--light-gray);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.1);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: none;
+            padding: 15px 0;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        .breadcrumb a { color: var(--gray); }
+        .breadcrumb a:hover { color: var(--accent); }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 40px;
+        }
+        .page-link {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: white;
+            border: 1.5px solid var(--light-gray);
+            color: var(--primary);
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .page-link:hover, .page-link.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-search { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .footer-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Utils */
+        .section { padding: 60px 0; }
+        .text-center { text-align: center; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .hidden { display: none; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="container">
+        <div class="navbar-main">
+            <a href="{% url 'store:home' %}" class="navbar-brand">Fashion<span>Store</span></a>
+
+            <div class="navbar-search">
+                <form action="{% url 'store:search' %}" method="get">
+                    <input type="text" name="q" placeholder="جستجو در محصولات..." 
+                           value="{{ request.GET.q }}" id="search-input" autocomplete="off">
+                    <button type="submit">🔍</button>
+                </form>
+                <div id="search-suggestions" class="hidden" style="
+                    position: absolute; top: 45px; right: 0; left: 0;
+                    background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                    overflow: hidden; z-index: 1000;
+                "></div>
+            </div>
+
+            <div class="navbar-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:profile' %}">👤 {{ user.first_name|default:user.username }}</a>
+                    <a href="{% url 'store:wishlist' %}">❤️ علاقه‌مندی</a>
+                    <a href="{% url 'accounts:logout' %}">خروج</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">ورود</a>
+                    <a href="{% url 'accounts:register' %}">ثبت‌نام</a>
+                {% endif %}
+                <a href="{% url 'cart:detail' %}">
+                    🛒
+                    <span class="cart-badge" id="cart-count">{{ cart|length }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Nav -->
+    <div class="category-nav">
+        <div class="container">
+            <ul>
+                <li><a href="{% url 'store:product_list' %}?gender=women">👗 زنانه</a></li>
+                <li><a href="{% url 'store:product_list' %}?gender=men">👔 مردانه</a></li>
+                <li><a href="{% url 'store:product_list' %}?occasion=sport">🏃 ورزشی</a></li>
+                <li><a href="{% url 'store:product_list' %}?occasion=formal">💼 رسمی</a></li>
+                <li><a href="{% url 'store:product_list' %}?occasion=party">✨ مجلسی</a></li>
+                <li><a href="{% url 'store:product_list' %}?occasion=casual">☕ راحتی</a></li>
+                {% for cat in main_categories %}
+                    <li><a href="{% url 'store:product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+                {% endfor %}
+                <li><a href="{% url 'store:product_list' %}?on_sale=1" style="color: #e94560;">🔥 حراج</a></li>
+                <li><a href="{% url 'blog:post_list' %}">📝 مجله مد</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Messages -->
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="message {{ message.tags }}" id="msg-{{ forloop.counter }}">
+        <span>{{ message }}</span>
+        <button class="message-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Content -->
+{% block content %}{% endblock %}
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Fashion<span>Store</span></div>
+                <p style="font-size: 0.9rem; line-height: 1.8;">
+                    فروشگاه آنلاین لباس و اکسسوری با بیش از هزاران محصول متنوع.
+                    ارسال سریع به سراسر ایران.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h4>دسترسی سریع</h4>
+                <ul>
+                    <li><a href="{% url 'store:product_list' %}">همه محصولات</a></li>
+                    <li><a href="{% url 'store:product_list' %}?on_sale=1">تخفیف‌ها</a></li>
+                    <li><a href="{% url 'store:product_list' %}?is_new=1">جدیدترین</a></li>
+                    <li><a href="{% url 'blog:post_list' %}">مجله مد</a></li>
+                    <li><a href="#">راهنمای سایزبندی</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>حساب کاربری</h4>
+                <ul>
+                    <li><a href="{% url 'accounts:profile' %}">پروفایل من</a></li>
+                    <li><a href="{% url 'orders:order_list' %}">سفارشات من</a></li>
+                    <li><a href="{% url 'store:wishlist' %}">علاقه‌مندی‌ها</a></li>
+                    <li><a href="{% url 'accounts:wallet' %}">کیف پول</a></li>
+                    <li><a href="{% url 'accounts:loyalty' %}">امتیاز وفاداری</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>پشتیبانی</h4>
+                <ul>
+                    <li><a href="#">تماس با ما</a></li>
+                    <li><a href="#">قوانین و مقررات</a></li>
+                    <li><a href="#">حریم خصوصی</a></li>
+                    <li><a href="#">راهنمای مرجوعی</a></li>
+                    <li><a href="{% url 'vendors:register' %}">فروشنده شوید</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© ۱۴۰۳ FashionStore — تمامی حقوق محفوظ است</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Auto-hide messages
+    document.querySelectorAll('.message').forEach(msg => {
+        setTimeout(() => msg.style.opacity = '0', 4000);
+        setTimeout(() => msg.remove(), 4500);
+    });
+
+    // Search suggestions
+    const searchInput = document.getElementById('search-input');
+    const suggestionsBox = document.getElementById('search-suggestions');
+    let searchTimeout;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            if (query.length < 2) { suggestionsBox.classList.add('hidden'); return; }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`{% url 'store:search' %}?q=${encodeURIComponent(query)}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        suggestionsBox.innerHTML = data.suggestions.map(s =>
+                            `<a href="/products/${s.slug}/" style="display:block;padding:12px 20px;border-bottom:1px solid #eee;color:#333;font-size:0.9rem;">🔍 ${s.name}</a>`
+                        ).join('');
+                        suggestionsBox.classList.remove('hidden');
+                    } else {
+                        suggestionsBox.classList.add('hidden');
+                    }
+                });
+            }, 300);
+        });
+
+        document.addEventListener('click', e => {
+            if (!searchInput.contains(e.target)) suggestionsBox.classList.add('hidden');
+        });
+    }
+
+    // Wishlist toggle
+    function toggleWishlist(btn, productId) {
+        fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.classList.toggle('active', data.in_wishlist);
+            btn.textContent = data.in_wishlist ? '❤️' : '🤍';
+        });
+    }
+
+    function getCookie(name) {
+        let value = `; ${document.cookie}`;
+        let parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}سفارشات من{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0;">
+    <h1 style="margin-bottom: 30px; font-size: 1.8rem;">📦 سفارشات من</h1>
+
+    {% if orders %}
+    {% for order in orders %}
+    <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+            <div>
+                <div style="font-weight: 700; font-size: 1rem;">سفارش {{ order.order_number }}</div>
+                <div style="color: #666; font-size: 0.85rem; margin-top: 4px;">{{ order.created_at|date:"Y/m/d - H:i" }}</div>
+            </div>
+            <div style="text-align: left;">
+                <span style="
+                    padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+                    {% if order.status == 'delivered' %}background: #d4edda; color: #155724;
+                    {% elif order.status == 'cancelled' %}background: #f8d7da; color: #721c24;
+                    {% elif order.status == 'shipped' %}background: #cce5ff; color: #004085;
+                    {% else %}background: #fff3cd; color: #856404;{% endif %}
+                ">{{ order.get_status_display }}</span>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #eee;">
+            <div style="color: #666; font-size: 0.9rem;">
+                {{ order.items.count }} محصول | {{ order.get_payment_method_display }}
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <span style="font-weight: 700; font-size: 1rem;">{{ order.total|intcomma }} تومان</span>
+                <a href="{% url 'orders:order_detail' order.id %}" style="color: var(--accent); font-size: 0.9rem;">جزئیات →</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align: center; padding: 80px; background: white; border-radius: 15px;">
+        <div style="font-size: 4rem; margin-bottom: 15px;">📦</div>
+        <h3>هنوز سفارشی ندارید</h3>
+        <a href="{% url 'store:product_list' %}" class="btn btn-primary" style="margin-top: 20px;">شروع خرید</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

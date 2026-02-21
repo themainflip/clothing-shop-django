@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}ورود{% endblock %}
+
+{% block content %}
+<div style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div style="background: white; border-radius: 20px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">👤</div>
+            <h2 style="font-size: 1.5rem; color: #1a1a2e;">ورود به حساب</h2>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>نام کاربری یا ایمیل</label>
+                <input type="text" name="username" class="form-control" placeholder="نام کاربری" required>
+            </div>
+            <div class="form-group">
+                <label>رمز عبور</label>
+                <input type="password" name="password" class="form-control" placeholder="رمز عبور" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 14px;">ورود</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: #666;">
+            حساب ندارید؟ <a href="{% url 'accounts:register' %}" style="color: var(--accent); font-weight: 600;">ثبت‌نام کنید</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

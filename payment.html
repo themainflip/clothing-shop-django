@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}پرداخت{% endblock %}
+{% block content %}
+<div class="container" style="padding: 80px 0; max-width: 550px;">
+    <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 10px;">پرداخت آنلاین</h2>
+        <p style="color: #666; margin-bottom: 5px;">سفارش: <strong>{{ order.order_number }}</strong></p>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--accent); margin: 20px 0;">
+            {{ order.total|intcomma }} تومان
+        </div>
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: right; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+                <span style="color: #666;">تحویل‌گیرنده:</span>
+                <span>{{ order.receiver_name }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <span style="color: #666;">روش ارسال:</span>
+                <span>{{ order.get_shipping_method_display }}</span>
+            </div>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.05rem;">
+                💳 پرداخت از طریق زرین‌پال
+            </button>
+        </form>
+        <p style="color: #999; font-size: 0.8rem; margin-top: 15px;">🔒 اتصال امن با SSL | پرداخت از طریق درگاه بانکی</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}علاقه‌مندی‌های من{% endblock %}
+{% block content %}
+<div class="container section">
+    <h1 style="margin-bottom: 30px; font-size: 1.8rem;">❤️ علاقه‌مندی‌های من</h1>
+    {% if items %}
+    <div class="products-grid">
+        {% for item in items %}
+        {% with product=item.product %}
+        {% include 'partials/product_card.html' with user_wishlist=user.wishlist.all %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 80px; background: white; border-radius: 15px;">
+        <div style="font-size: 4rem; margin-bottom: 15px;">❤️</div>
+        <h3>هنوز محصولی به علاقه‌مندی‌ها اضافه نشده</h3>
+        <a href="{% url 'store:product_list' %}" class="btn btn-primary" style="margin-top: 20px;">مشاهده محصولات</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

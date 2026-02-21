@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}سفارش ثبت شد{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 80px 0; text-align: center; max-width: 600px;">
+    <div style="background: white; border-radius: 20px; padding: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <div style="font-size: 5rem; margin-bottom: 20px; animation: bounce 1s ease;">✅</div>
+        <h2 style="color: #28a745; font-size: 1.8rem; margin-bottom: 10px;">سفارش شما ثبت شد!</h2>
+        <p style="color: #666; margin-bottom: 30px;">
+            شماره سفارش: <strong style="color: #1a1a2e; font-size: 1.1rem;">{{ order.order_number }}</strong>
+        </p>
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: right; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #666;">روش ارسال:</span>
+                <span>{{ order.get_shipping_method_display }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #666;">مبلغ:</span>
+                <span style="font-weight: 700; color: var(--accent);">{{ order.total|intcomma }} تومان</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: #666;">وضعیت:</span>
+                <span style="color: #28a745; font-weight: 600;">{{ order.get_status_display }}</span>
+            </div>
+        </div>
+        <p style="color: #666; font-size: 0.9rem; margin-bottom: 25px;">
+            پیامک تایید به شماره شما ارسال خواهد شد.
+        </p>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-primary">مشاهده سفارش</a>
+            <a href="{% url 'store:product_list' %}" class="btn btn-outline" style="border: 1.5px solid #ddd; color: #333;">ادامه خرید</a>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="container" style="padding: 40px 0; max-width: 800px;">
+    <a href="{% url 'blog:post_list' %}" style="color: #666; font-size: 0.9rem;">← بازگشت به مجله</a>
+    <h1 style="margin: 20px 0; font-size: 2rem; line-height: 1.4;">{{ post.title }}</h1>
+    <div style="color: #999; font-size: 0.85rem; margin-bottom: 25px;">
+        {{ post.created_at|date:"Y/m/d" }} | {{ post.view_count }} بازدید
+    </div>
+    {% if post.cover_image %}
+    <img src="{{ post.cover_image.url }}" style="width: 100%; border-radius: 15px; margin-bottom: 30px; max-height: 400px; object-fit: cover;">
+    {% endif %}
+    <div style="line-height: 2; color: #444; font-size: 1rem; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+        {{ post.body|linebreaks }}
+    </div>
+</div>
+{% endblock %}
